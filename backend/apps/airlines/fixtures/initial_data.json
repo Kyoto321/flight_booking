@@ -1,0 +1,85 @@
+[
+  {
+    "model": "airlines.airline",
+    "pk": "00000000-0000-0000-0000-000000000001",
+    "fields": {
+      "name": "Ibom Air",
+      "code": "QI",
+      "priority": 1,
+      "search_enabled": true,
+      "booking_enabled": false
+    }
+  },
+  {
+    "model": "airlines.airline",
+    "pk": "00000000-0000-0000-0000-000000000002",
+    "fields": {
+      "name": "Air Peace",
+      "code": "P4",
+      "priority": 2,
+      "search_enabled": true,
+      "booking_enabled": false
+    }
+  },
+  {
+    "model": "airlines.airline",
+    "pk": "00000000-0000-0000-0000-000000000003",
+    "fields": {
+      "name": "United Nigeria",
+      "code": "UN",
+      "priority": 3,
+      "search_enabled": true,
+      "booking_enabled": false
+    }
+  },
+  {
+    "model": "airlines.airport",
+    "pk": "00000000-0000-0000-0000-100000000001",
+    "fields": {
+      "name": "Murtala Muhammed International Airport",
+      "city": "Lagos",
+      "state": "Lagos",
+      "iata_code": "LOS"
+    }
+  },
+  {
+    "model": "airlines.airport",
+    "pk": "00000000-0000-0000-0000-100000000002",
+    "fields": {
+      "name": "Nnamdi Azikiwe International Airport",
+      "city": "Abuja",
+      "state": "FCT",
+      "iata_code": "ABV"
+    }
+  },
+  {
+    "model": "airlines.airport",
+    "pk": "00000000-0000-0000-0000-100000000003",
+    "fields": {
+      "name": "Port Harcourt International Airport",
+      "city": "Port Harcourt",
+      "state": "Rivers",
+      "iata_code": "PHC"
+    }
+  },
+  {
+    "model": "airlines.airport",
+    "pk": "00000000-0000-0000-0000-100000000004",
+    "fields": {
+      "name": "Akanu Ibiam International Airport",
+      "city": "Enugu",
+      "state": "Enugu",
+      "iata_code": "ENU"
+    }
+  },
+  {
+    "model": "airlines.airport",
+    "pk": "00000000-0000-0000-0000-100000000005",
+    "fields": {
+      "name": "Victor Attah International Airport",
+      "city": "Uyo",
+      "state": "Akwa Ibom",
+      "iata_code": "UYO"
+    }
+  }
+]
