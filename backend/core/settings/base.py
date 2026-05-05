@@ -6,6 +6,7 @@ import django.utils.encoding
 
 # Monkeypatch for django-fernet-fields compatibility with Django 4.0+
 django.utils.encoding.force_text = django.utils.encoding.force_str
+django.utils.encoding.force_bytes = django.utils.encoding.force_bytes
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -36,6 +37,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
+    'drf_spectacular',
 
     # Local apps
     'apps.common',
@@ -118,6 +120,15 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Flight Booking API',
+    'DESCRIPTION': 'A comprehensive flight booking system API',
+    'VERSION': '1.0.0',
+    'SERVE_PERMISSIONS': ['rest_framework.permissions.AllowAny'],
+    'SCHEMA_PATH_PREFIX': '/api/v1/',
 }
 
 SIMPLE_JWT = {
@@ -146,3 +157,42 @@ CELERY_TASK_SERIALIZER = 'json'
 
 # Fernet Fields Key
 FERNET_KEY = env('FERNET_KEY', default='')
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': env('REDIS_URL', default='redis://localhost:6379/1'),
+    }
+}
+
+# Scraper Proxy Configuration
+SEARCH_PROXY = {
+    "server": env("SEARCH_PROXY_SERVER", default=""),
+    "username": env("SEARCH_PROXY_USER", default=""),
+    "password": env("SEARCH_PROXY_PASS", default=""),
+}
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+}
+
+print("BASE_DIR:", BASE_DIR)
+print("ENV PATH:", BASE_DIR / '.env')
+print("RAW ENV:", os.environ.get("DATABASE_URL"))

@@ -19,12 +19,20 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from .views import health_check
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/auth/', include('apps.accounts.urls')),
-    path('api/v1/profile/', include('apps.passengers.urls')),
+    path('api/v1/passengers/', include('apps.passengers.urls')),
+    path("api/v1/", include("apps.airlines.urls")),
     path('api/v1/health/', health_check, name='health-check'),
+    path("api/v1/", include("apps.search.urls")),
+    
+    # API Documentation
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]
 
 

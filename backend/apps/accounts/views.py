@@ -7,7 +7,8 @@ from rest_framework import status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib.auth import get_user_model
+from rest_framework_simplejwt.views import TokenObtainPairView
+from django.contrib.auth import get_user_model, authenticate
 from .models import OTPToken, Profile
 from .serializers import (
     RegisterSerializer, UserSerializer, OTPSerializer, 
@@ -109,6 +110,95 @@ class ResendOTPView(APIView):
             except User.DoesNotExist:
                 return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class PasswordResetRequestView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email')
+        if not email:
+            return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            user = User.objects.get(email=email)
+            generate_otp(user, 'RESET')
+            return Response(
+                {"message": "Password reset OTP sent to your email."},
+                status=status.HTTP_200_OK
+            )
+        except User.DoesNotExist:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+class PasswordResetConfirmView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email')
+        code = request.data.get('code')
+        new_password = request.data.get('new_password')
+        
+        if not all([email, code, new_password]):
+            return Response(
+                {"error": "Email, code, and new password are required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            user = User.objects.get(email=email)
+            otp = OTPToken.objects.filter(
+                user=user,
+                code=code,
+                purpose='RESET',
+                used=False,
+                expires_at__gt=timezone.now()
+            ).latest('created_at')
+            
+            otp.used = True
+            otp.save()
+            
+            user.set_password(new_password)
+            user.save()
+            
+            return Response(
+                {"message": "Password reset successfully. You can now login with your new password."},
+                status=status.HTTP_200_OK
+            )
+        except (User.DoesNotExist, OTPToken.DoesNotExist):
+            return Response({"error": "Invalid or expired reset code"}, status=status.HTTP_400_BAD_REQUEST)
+
+class LoginView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email')
+        password = request.data.get('password')
+        
+        if not email or not password:
+            return Response(
+                {"error": "Email and password are required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        user = authenticate(request, username=email, password=password)
+        if user is None:
+            return Response(
+                {"error": "Invalid email or password"},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        
+        if not user.is_active:
+            return Response(
+                {"error": "User account is not active. Please verify OTP first."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            "message": "Login successful.",
+            "refresh": str(refresh),
+            "access": str(refresh.access_token),
+            "user": UserSerializer(user).data
+        }, status=status.HTTP_200_OK)
 
 class ProfileView(APIView):
     permission_classes = [permissions.IsAuthenticated]
